@@ -1,7 +1,5 @@
 import { successResponse } from '../helpers/response';
 import asyncHandler from '../middlewares/async';
-import Alarm from '../models/Alarm';
-import Component from '../models/Component';
 import InfraredLog from '../models/InfraredLog';
 
 export const addInfraredLog = asyncHandler(async (req, res, next) => {
@@ -9,16 +7,16 @@ export const addInfraredLog = asyncHandler(async (req, res, next) => {
   successResponse(res, 'Log added', { infraredLog }, 201);
 });
 
-export const getSingleAlarm = asyncHandler(async (req, res, next) => {
+export const getSingleInfraredLog = asyncHandler(async (req, res, next) => {
   await req.validate({
-    AlarmId: 'required|string',
+    infraredLogId: 'required|string',
   });
 
-  let alarm = await Alarm.findById(req.params.componentId);
+  let infraredLog = await InfraredLog.findById(req.params.infraredLogId);
 
-  successResponse(res, 'alarm retrieved', { alarm }, 200);
+  successResponse(res, 'infrared log retrieved', { infraredLog }, 200);
 });
 
-export const getAllCompo = asyncHandler(async (req, res, next) => {
-  res.advancedResults(Component);
+export const getAllInfraredLogs = asyncHandler(async (req, res, next) => {
+  res.advancedResults(InfraredLog);
 });

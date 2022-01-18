@@ -2,7 +2,7 @@ import { successResponse } from '../helpers/response';
 import asyncHandler from '../middlewares/async';
 import Alarm from '../models/Alarm';
 
-export const addAlarm = asyncHandler(async (req, res, next) => {
+export const createAlarm = asyncHandler(async (req, res, next) => {
   await req.validate({
     componentId: 'required|string',
     startTime: 'required|date',
@@ -53,4 +53,18 @@ export const toggleAlarm = asyncHandler(async (req, res, next) => {
   alarm.save();
   alarm = await Alarm.findById(req.params.alarmId);
   successResponse(res, 'alarm toggled', { alarm }, 200);
+});
+
+export const getSingleAlarm = asyncHandler(async (req, res, next) => {
+  await req.validate({
+    alarmId: 'required|string',
+  });
+
+  let alarm = await Alarm.findById(req.params.alarmId);
+
+  successResponse(res, 'alarm retrieved', { alarm }, 200);
+});
+
+export const getAllAlarms = asyncHandler(async (req, res, next) => {
+  res.advancedResults(Alarm);
 });

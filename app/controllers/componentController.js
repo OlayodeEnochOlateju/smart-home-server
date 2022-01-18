@@ -3,7 +3,7 @@ import asyncHandler from '../middlewares/async';
 import Component from '../models/Component';
 import ComponentLog from '../models/ComponentLog';
 
-export const addComponent = asyncHandler(async (req, res, next) => {
+export const createComponent = asyncHandler(async (req, res, next) => {
   await req.validate({
     name: 'required|string',
     pinNumber: 'required|integer|min:3|max:6',
