@@ -10,11 +10,6 @@ const UserSchema = mongoose.Schema(
 			unique: true,
 			// required: [true, 'Please add a user name'],
 		},
-		phone: {
-			type: String,
-			unique: true,
-			// required: [true, 'Please add a phone number'],
-		},
 		email: {
 			type: String,
 			// required: [true, 'Please add an email'],
@@ -29,9 +24,6 @@ const UserSchema = mongoose.Schema(
 			// required: [true, 'Please add a password'],
 			minlength: 6,
 			select: false,
-		},
-		avatar: {
-			type: String,
 		},
 	},
 	{ timestamps: true }

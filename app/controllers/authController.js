@@ -11,13 +11,13 @@ import User from '../models/User';
 export const signup = asyncHandler(async (req, res, next) => {
 	await req.validate({
 		email: 'required|string|email|unique:user,email',
-		phone: 'required|string|unique:user,phone',
+		username: 'required|string|unique:user',
 		password: 'required|string|confirmed|min:6',
 	});
 
-	const { email, password, phone } = req.body;
+	const { email, username, password, } = req.body;
 
-	const user = await User.create({ email, password, phone });
+	const user = await User.create({ email, username, password});
 
 	let token = await EmailVerificationToken.create({ user: user._id });
 
@@ -28,15 +28,15 @@ export const signup = asyncHandler(async (req, res, next) => {
 
 export const signin = asyncHandler(async (req, res, next) => {
 	await req.validate({
-		email: 'required|string|email',
+		username: 'required|string|email',
 		password: 'required|string|min:6',
 	});
 
-	const { email, password } = req.body;
+	const { username, password } = req.body;
 	let user;
 
 	// Check for user
-	const userCheck = await User.findOne({ email }).select('+password');
+	const userCheck = await User.findOne({ username }).select('+password');
 
 	if (!userCheck) {
 		return errorResponse(next, 'Invalid credentials', 401);
@@ -48,7 +48,7 @@ export const signin = asyncHandler(async (req, res, next) => {
 	if (!isMatch) {
 		return errorResponse(next, 'Invalid credentials', 401);
 	} else {
-		user = await User.findOne({ email });
+		user = await User.findOne({ username });
 	}
 
 	sendTokenResponse(res, user);
@@ -74,9 +74,9 @@ export const getAuthUser = asyncHandler(async (req, res, next) => {
 // eslint-disable-next-line no-unused-vars
 export const updateDetails = asyncHandler(async (req, res, next) => {
 	await req.validate({
-		email: 'required|string|email',
-		username: 'required|string',
-	});
+    username: 'required|string|unique:user',
+    password: 'required|string|confirmed|min:6',
+  });
 
 	const fieldsToUpdate = {
 		name: req.body.name,
