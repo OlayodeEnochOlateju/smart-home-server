@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import asyncHandler from '../middlewares/async';
 import sendEmail from '../../configs/mailer';
-import EmailVerificationToken from '../models/EmailVerificationToken';
+// import EmailVerificationToken from '../models/EmailVerificationToken';
 import { errorResponse, successResponse } from '../helpers/response';
 
 //models
@@ -11,7 +11,7 @@ import User from '../models/User';
 export const signup = asyncHandler(async (req, res, next) => {
 	await req.validate({
 		email: 'required|string|email|unique:user,email',
-		username: 'required|string|unique:user',
+		username: 'required|string|unique,username',
 		password: 'required|string|confirmed|min:6',
 	});
 
@@ -19,9 +19,9 @@ export const signup = asyncHandler(async (req, res, next) => {
 
 	const user = await User.create({ email, username, password});
 
-	let token = await EmailVerificationToken.create({ user: user._id });
+	// let token = await EmailVerificationToken.create({ user: user._id });
 
-	await token.save();
+	// await token.save();
 
 	sendTokenResponse(res, user, 201);
 });
@@ -110,144 +110,144 @@ export const updatePassword = asyncHandler(async (req, res, next) => {
 	sendTokenResponse(res, user);
 });
 
-export const forgotPassword = asyncHandler(async (req, res, next) => {
-	await req.validate({
-		email: 'required|email',
-	});
+// export const forgotPassword = asyncHandler(async (req, res, next) => {
+// 	await req.validate({
+// 		email: 'required|email',
+// 	});
 
-	const user = await User.findOne({ email: req.body.email });
+// 	const user = await User.findOne({ email: req.body.email });
 
-	if (!user) {
-		return errorResponse(next, 'There is no user with that email', 404);
-	}
+// 	if (!user) {
+// 		return errorResponse(next, 'There is no user with that email', 404);
+// 	}
 
-	// Get reset token
-	const resetToken = user.getResetPasswordToken();
+// 	// Get reset token
+// 	const resetToken = user.getResetPasswordToken();
 
-	await user.save({ validateBeforeSave: false });
+// 	await user.save({ validateBeforeSave: false });
 
-	// Create reset url
-	const resetUrl = `${req.protocol}://${req.get(
-		'host'
-	)}/v1/auth/reset-password/${resetToken}`;
+// 	// Create reset url
+// 	const resetUrl = `${req.protocol}://${req.get(
+// 		'host'
+// 	)}/v1/auth/reset-password/${resetToken}`;
 
-	const message = `You are receiving this email because you requested the reset of a password. Please click on this link to continue: \n\n ${resetUrl}`;
+// 	const message = `You are receiving this email because you requested the reset of a password. Please click on this link to continue: \n\n ${resetUrl}`;
 
-	try {
-		await sendEmail({
-			email: user.email,
-			subject: 'Password reset token',
-			message,
-		});
+// 	try {
+// 		await sendEmail({
+// 			email: user.email,
+// 			subject: 'Password reset token',
+// 			message,
+// 		});
 
-		successResponse(res, '', { success: true, data: 'Email sent' });
-	} catch (err) {
-		user.resetPasswordToken = undefined;
-		user.resetPasswordExpire = undefined;
+// 		successResponse(res, '', { success: true, data: 'Email sent' });
+// 	} catch (err) {
+// 		user.resetPasswordToken = undefined;
+// 		user.resetPasswordExpire = undefined;
 
-		await user.save({ validateBeforeSave: false });
+// 		await user.save({ validateBeforeSave: false });
 
-		return errorResponse(next, 'Email could not be sent', 500);
-	}
+// 		return errorResponse(next, 'Email could not be sent', 500);
+// 	}
 
-	successResponse(res, '', { user });
-});
+// 	successResponse(res, '', { user });
+// });
 
-export const resetPassword = asyncHandler(async (req, res, next) => {
-	await req.validate({
-		password: 'required|string|confirmed',
-		resettoken: 'required|string',
-	});
-	// Get hashed token
-	const resetPasswordToken = createHash('sha256')
-		.update(req.params.resettoken)
-		.digest('hex');
+// export const resetPassword = asyncHandler(async (req, res, next) => {
+// 	await req.validate({
+// 		password: 'required|string|confirmed',
+// 		resettoken: 'required|string',
+// 	});
+// 	// Get hashed token
+// 	const resetPasswordToken = createHash('sha256')
+// 		.update(req.params.resettoken)
+// 		.digest('hex');
 
-	const user = await User.findOne({
-		resetPasswordToken,
-		resetPasswordExpire: { $gt: Date.now() },
-	});
+// 	const user = await User.findOne({
+// 		resetPasswordToken,
+// 		resetPasswordExpire: { $gt: Date.now() },
+// 	});
 
-	if (!user) {
-		return errorResponse(next, 'Invalid token', 400);
-	}
+// 	if (!user) {
+// 		return errorResponse(next, 'Invalid token', 400);
+// 	}
 
-	// Set new password
-	user.password = req.body.password;
-	user.resetPasswordToken = undefined;
-	user.resetPasswordExpire = undefined;
-	await user.save();
+// 	// Set new password
+// 	user.password = req.body.password;
+// 	user.resetPasswordToken = undefined;
+// 	user.resetPasswordExpire = undefined;
+// 	await user.save();
 
-	sendTokenResponse(res, user);
-});
+// 	sendTokenResponse(res, user);
+// });
 
-export const getEmailVerificationToken = asyncHandler(
-	async (req, res, next) => {
-		const user = await User.findById(req.user.id);
+// export const getEmailVerificationToken = asyncHandler(
+// 	async (req, res, next) => {
+// 		const user = await User.findById(req.user.id);
 
-		if (user.verified) {
-			return errorResponse(next, 'User verified already', 400);
-		}
+// 		if (user.verified) {
+// 			return errorResponse(next, 'User verified already', 400);
+// 		}
 
-		const token = await EmailVerificationToken.findOne({ user: user._id });
+// 		const token = await EmailVerificationToken.findOne({ user: user._id });
 
-		const newToken = token.getVerificationToken();
+// 		const newToken = token.getVerificationToken();
 
-		await token.save();
+// 		await token.save();
 
-		const message = `Verify your email using the following link \n 
-                     ${process.env.FRONTEND_URL}/verify-email/${newToken}`;
+// 		const message = `Verify your email using the following link \n 
+//                      ${process.env.FRONTEND_URL}/verify-email/${newToken}`;
 
-		await sendEmail({
-			email: user.email,
-			subject: `Email Confirmation, ${process.env.APP_NAME}`,
-			message,
-		});
+// 		await sendEmail({
+// 			email: user.email,
+// 			subject: `Email Confirmation, ${process.env.APP_NAME}`,
+// 			message,
+// 		});
 
-		successResponse(
-			res,
-			'Email verification sent, check your email inbox',
-			{},
-			200
-		);
-	}
-);
+// 		successResponse(
+// 			res,
+// 			'Email verification sent, check your email inbox',
+// 			{},
+// 			200
+// 		);
+// 	}
+// );
 
-export const verifyEmail = asyncHandler(async (req, res, next) => {
-	req.validate({
-		token: 'required|string',
-	});
-	const emailToken = req.params.token;
+// export const verifyEmail = asyncHandler(async (req, res, next) => {
+// 	req.validate({
+// 		token: 'required|string',
+// 	});
+// 	const emailToken = req.params.token;
 
-	// Get hashed token
-	const verificationToken = createHash('sha256')
-		.update(emailToken)
-		.digest('hex');
+// 	// Get hashed token
+// 	const verificationToken = createHash('sha256')
+// 		.update(emailToken)
+// 		.digest('hex');
 
-	const token = await EmailVerificationToken.findOne({
-		token: verificationToken,
-		expires: { $gt: Date.now() },
-	});
+// 	const token = await EmailVerificationToken.findOne({
+// 		token: verificationToken,
+// 		expires: { $gt: Date.now() },
+// 	});
 
-	if (!token) {
-		return errorResponse(next, 'Invalid token', 400);
-	}
+// 	if (!token) {
+// 		return errorResponse(next, 'Invalid token', 400);
+// 	}
 
-	// update user verification status
-	const user = await User.findById(token.user);
+// 	// update user verification status
+// 	const user = await User.findById(token.user);
 
-	user.verified = true;
+// 	user.verified = true;
 
-	await user.save();
+// 	await user.save();
 
-	// remove token from document
-	token.token = undefined;
-	token.expires = undefined;
+// 	// remove token from document
+// 	token.token = undefined;
+// 	token.expires = undefined;
 
-	await token.save();
+// 	await token.save();
 
-	successResponse(res, 'Email verification is successful', {}, 200);
-});
+// 	successResponse(res, 'Email verification is successful', {}, 200);
+// });
 
 // Get token from model, create cookie and send response
 const sendTokenResponse = (res, user, statusCode = 200) => {

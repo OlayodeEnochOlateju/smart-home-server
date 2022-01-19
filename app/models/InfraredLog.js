@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const InfraredLogSchema = mongoose.Schema(
+    {},
     { timestamps: true }
 );
 

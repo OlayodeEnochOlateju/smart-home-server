@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const AlarmSchema = mongoose.Schema(
   {
     component: {
-      type: mongoose.Schema.objectId,
+      type: mongoose.Schema.ObjectId,
       ref: 'Component',
       // required: [true, 'Please add a user name'],
     },
